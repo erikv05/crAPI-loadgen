@@ -125,13 +125,8 @@ class QuickstartUser(HttpUser):
              catch_response = True) as response:
                 if response.status_code >= 400:
                     print(f"Couldn't get post {self.post_id}: response {response.status_code}")
-        
-        
-
-        
-        
-        
                 
+    #initializing user (logging in/applying coupon)
     def on_start(self):
         with self.client.post("/identity/api/auth/login", json={"email":self.email, "password":self.password}, catch_response = True) as response:
             if response.status_code >= 400:
