@@ -15,19 +15,19 @@ class QuickstartUser(HttpUser):
     host = "http://localhost:8888"
     wait_time = between(1, 5)
 
-    # defunct
-    # def set_name(self):
-    #     self.name = ''.join(random.choice(self.letters) for i in range(8))
-    
-    # def set_password(self):
-    #     self.password = self.name + "A1!"
-    
-    # def set_number(self):
-    #     for i in range(10):
-    #         self.number += str(random.randint(0, 9))
 
-    # def set_email(self):
-    #     self.email = self.name + "@example.com"
+    def set_name(self):
+        self.name = ''.join(random.choice(self.letters) for i in range(8))
+    
+    def set_password(self):
+        self.password = self.name + "A1!"
+    
+    def set_number(self):
+        for i in range(10):
+            self.number += str(random.randint(0, 9))
+
+    def set_email(self):
+        self.email = self.name + "@example.com"
 
     '''
     Main action for each user. Stresses endpoints that 
@@ -128,6 +128,13 @@ class QuickstartUser(HttpUser):
                 
     #initializing user (logging in/applying coupon)
     def on_start(self):
+        
+        self.set_name()
+        self.set_password()
+        self.set_nubmer()
+        self.set_password()
+
+
         with self.client.post("/identity/api/auth/login", json={"email":self.email, "password":self.password}, catch_response = True) as response:
             if response.status_code >= 400:
                 print(response.json())
