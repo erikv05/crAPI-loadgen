@@ -6,15 +6,14 @@ from locust import HttpUser, task, between
 class QuickstartUser(HttpUser):
     letters = string.ascii_lowercase
     funds = 1
-    password = "Victim1One"
-    name = "Victim One"
-    email = "victim.one@example.com"
-    number = "4156895423"
+    password = ""
+    name = ""
+    email = ""
+    number = ""
     order_id = 0
     post_id = ""
     host = "http://localhost:8888"
     wait_time = between(1, 5)
-
 
     def set_name(self):
         self.name = ''.join(random.choice(self.letters) for i in range(8))
@@ -125,19 +124,25 @@ class QuickstartUser(HttpUser):
              catch_response = True) as response:
                 if response.status_code >= 400:
                     print(f"Couldn't get post {self.post_id}: response {response.status_code}")
+        #getting QR code to return
+        with self.client.get(f"/workshop/api/shop/return_qr_code", json={"accept":"*/*"}, catch_response = True) as response:
+            if response.status_code >= 400:
+                print(f"Couldn't get QR code: response {response.status_code}")
                 
     #initializing user (logging in/applying coupon)
     def on_start(self):
         
         self.set_name()
         self.set_password()
-        self.set_nubmer()
-        self.set_password()
+        self.set_number()
+        self.set_email()
 
-
+        with self.client.post("/identity/api/auth/signup", json={"email":self.email, "password":self.password, "name":self.name, "number":self.number}, catch_response=True) as response:
+            if response.status_code >= 400:
+                print
+                raise Exception("Could not sign up")
         with self.client.post("/identity/api/auth/login", json={"email":self.email, "password":self.password}, catch_response = True) as response:
             if response.status_code >= 400:
-                print(response.json())
                 raise Exception(f"Could not log in")
             else:
                 login = response.json()
@@ -145,4 +150,4 @@ class QuickstartUser(HttpUser):
         #apply coupon
         with self.client.post("/workshop/api/shop/apply_coupon", json={"amount":75, "coupon_code": "TRAC075"}, catch_response = True) as response:
             if response.status_code >= 400:
-                print(f"Couldn't validate coupon: response {response.status_code}")
+                print(f"Couldn't apply coupon: response {response.status_code}")
