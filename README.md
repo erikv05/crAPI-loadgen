@@ -1,4 +1,4 @@
-# crAPI-loadgen
+# Loadgen Instructions
 
 In order to use this loadgen, go to https://docs.levo.ai/beta/api-observability/quickstart and follow all the steps to get the API observability testing up and running.
 
