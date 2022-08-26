@@ -90,6 +90,12 @@ class QuickstartUser(HttpUser):
                     print(f"Couldn't return order: response {response.status_code}")
             if self.funds == -1:
                 self.funds = 0
+
+
+
+
+
+
         #get posts on community
         with self.client.get(f"/community/api/v2/community/posts/recent", catch_response = True) as response:
             if response.status_code >= 400:
@@ -108,16 +114,6 @@ class QuickstartUser(HttpUser):
             json={"content":"I know, right? I love identity fraud!"}, catch_response = True) as response:
                 if response.status_code >= 400:
                     print(f"Couldn't create post: response {response.status_code}")
-        #create new mechanic
-        with self.client.post("/workshop/api/mechanic/signup", 
-        json={"name":f"{''.join(random.choice(self.letters) for i in range(8))}",
-        "email":f"{''.join(random.choice(self.letters) for i in range(8))}@example.com",
-        "number":random.randint(1, 1000000),
-        "password":f"{''.join(random.choice(self.letters) for i in range(8))}A1!",
-        "mechanic_code":''.join(random.choice(self.letters) for i in range(8))},
-         catch_response = True) as response:
-            if response.status_code >= 400:
-                print(f"Couldn't add mechanic: response {response.status_code}")
         #get specific post
         if self.post_id != "":
             with self.client.get(f"/community/api/v2/community/posts/{self.post_id}",
@@ -139,7 +135,6 @@ class QuickstartUser(HttpUser):
 
         with self.client.post("/identity/api/auth/signup", json={"email":self.email, "password":self.password, "name":self.name, "number":self.number}, catch_response=True) as response:
             if response.status_code >= 400:
-                print
                 raise Exception("Could not sign up")
         with self.client.post("/identity/api/auth/login", json={"email":self.email, "password":self.password}, catch_response = True) as response:
             if response.status_code >= 400:
@@ -147,6 +142,8 @@ class QuickstartUser(HttpUser):
             else:
                 login = response.json()
         self.client.headers["Authorization"] = login["type"] + " " + login["token"]
+        
+        #one-time API calls
         #apply coupon
         with self.client.post("/workshop/api/shop/apply_coupon", json={"amount":75, "coupon_code": "TRAC075"}, catch_response = True) as response:
             if response.status_code >= 400:
