@@ -3,7 +3,7 @@ import random
 import string
 from locust import HttpUser, task, between
 
-class QuickstartUser(HttpUser):
+class Consumer(HttpUser):
     letters = string.ascii_lowercase
     funds = 1
     password = ""
@@ -148,3 +148,57 @@ class QuickstartUser(HttpUser):
         with self.client.post("/workshop/api/shop/apply_coupon", json={"amount":75, "coupon_code": "TRAC075"}, catch_response = True) as response:
             if response.status_code >= 400:
                 print(f"Couldn't apply coupon: response {response.status_code}")
+
+class Mechanic(HttpUser):
+    letters = string.ascii_lowercase
+    mechanic_code = ""
+    password = ""
+    name = ""
+    email = ""
+    number = ""
+    host = "http://localhost:8888"
+    wait_time = between(1, 5)
+
+    def set_name(self):
+        self.name = ''.join(random.choice(self.letters) for i in range(8))
+    
+    def set_password(self):
+        self.password = self.name + "A1!"
+    
+    def set_number(self):
+        for i in range(10):
+            self.number += str(random.randint(0, 9))
+
+    def set_email(self):
+        self.email = self.name + "@example.com"
+
+    def set_mechanic_code(self):
+        for i in range(6):
+            self.mechanic_code += str(random.randint(0, 9))
+
+    '''
+    Main action for each mechanic. Stresses endpoints that 
+    an average mechanic might exercise.
+    '''
+    @task
+    def start_mechanic_action(self):
+        print("Hello World!")
+                
+    #initializing user (logging in/applying coupon)
+    def on_start(self):
+        
+        self.set_name()
+        self.set_password()
+        self.set_number()
+        self.set_email()
+        self.set_mechanic_code()
+
+        with self.client.post("/workshop/api/mechanic/signup", json={"name":self.name, "email":self.email, "password":self.password, "name":self.name, "number":self.number, "mechanic_code":self.mechanic_code}, catch_response=True) as response:
+            if response.status_code >= 400:
+                raise Exception("Could not sign up mechanic")
+        with self.client.post("/identity/api/auth/login", json={"email":self.email, "password":self.password}, catch_response = True) as response:
+            if response.status_code >= 400:
+                raise Exception(f"Could not log in mechanic")
+            else:
+                login = response.json()
+        self.client.headers["Authorization"] = login["type"] + " " + login["token"]
