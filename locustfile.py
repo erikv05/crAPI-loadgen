@@ -135,9 +135,11 @@ class Consumer(HttpUser):
 
         with self.client.post("/identity/api/auth/signup", json={"email":self.email, "password":self.password, "name":self.name, "number":self.number}, catch_response=True) as response:
             if response.status_code >= 400:
+                print(response.status_code)
                 raise Exception("Could not sign up")
         with self.client.post("/identity/api/auth/login", json={"email":self.email, "password":self.password}, catch_response = True) as response:
             if response.status_code >= 400:
+                print(response.status_code)
                 raise Exception(f"Could not log in")
             else:
                 login = response.json()
@@ -182,7 +184,9 @@ class Mechanic(HttpUser):
     '''
     @task
     def start_mechanic_action(self):
-        print("Hello World!")
+        with self.client.get(f"/workshop/api/mechanic/service_requests", catch_response = True) as response:
+            if response.status_code >= 400:
+                print(f"Couldn't get service requests for mechanic: response {response.status_code}")
                 
     #initializing user (logging in/applying coupon)
     def on_start(self):
@@ -195,9 +199,11 @@ class Mechanic(HttpUser):
 
         with self.client.post("/workshop/api/mechanic/signup", json={"name":self.name, "email":self.email, "password":self.password, "name":self.name, "number":self.number, "mechanic_code":self.mechanic_code}, catch_response=True) as response:
             if response.status_code >= 400:
+                print(response.status_code)
                 raise Exception("Could not sign up mechanic")
         with self.client.post("/identity/api/auth/login", json={"email":self.email, "password":self.password}, catch_response = True) as response:
             if response.status_code >= 400:
+                print(response.status_code)
                 raise Exception(f"Could not log in mechanic")
             else:
                 login = response.json()
